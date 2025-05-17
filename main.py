@@ -30,6 +30,18 @@ from dialectical_analysis import (
     analyze_bit_contributions,
     analyze_golden_ratio_in_triads
 )
+from utils import king_wen_sequence
+from hypercube_analysis import (
+    create_hypercube_graph,
+    analyze_king_wen_path,
+    project_hypercube_to_3d,
+    visualize_hypercube_and_king_wen,
+    analyze_triadic_structure_in_hypercube,
+    visualize_triads_in_hypercube,
+    analyze_subspace_structure,
+    analyze_distance_matrix_in_hypercube,
+    run_hypercube_analysis
+)
 
 def main():
     """Main function to run all analyses of the King Wen sequence."""
@@ -139,6 +151,30 @@ def main():
         print(f"Error in dialectical analysis: {str(e)}")
         dialectical_results = None
 
+    # Hypercube analysis
+    print("\n15. Hypercube Analysis")
+    try:
+        print("\n15.1 Running Comprehensive Hypercube Analysis")
+        hypercube_results = run_hypercube_analysis(king_wen_sequence)
+        
+        print("\n15.2 Analyzing Subspace Structure")
+        subspace_analysis = analyze_subspace_structure(king_wen_sequence)
+        print("Analyzed how sequence traverses different subspaces")
+        
+        print("\n15.3 Analyzing Distance Matrix")
+        distance_analysis = analyze_distance_matrix_in_hypercube(king_wen_sequence)
+        print(f"Average Hamming distance: {distance_analysis['avg_distance']:.4f}")
+        
+        # Store results for comprehensive analysis
+        hypercube_results.update({
+            "subspace_analysis": subspace_analysis,
+            "distance_analysis": distance_analysis
+        })
+        
+    except Exception as e:
+        print(f"Error in hypercube analysis: {str(e)}")
+        hypercube_results = None
+
 def comprehensive_analysis():
     """Perform a comprehensive analysis of the King Wen sequence structure."""
     
@@ -175,6 +211,20 @@ def comprehensive_analysis():
     except Exception as e:
         print(f"Error in dialectical analysis: {str(e)}")
         dialectical_results = None
+
+    # Run hypercube analysis
+    print("\n9. Performing hypercube analysis...")
+    try:
+        hypercube_results = run_hypercube_analysis(king_wen_sequence)
+        subspace_analysis = analyze_subspace_structure(king_wen_sequence)
+        distance_analysis = analyze_distance_matrix_in_hypercube(king_wen_sequence)
+        hypercube_results.update({
+            "subspace_analysis": subspace_analysis,
+            "distance_analysis": distance_analysis
+        })
+    except Exception as e:
+        print(f"Error in hypercube analysis: {str(e)}")
+        hypercube_results = None
     
     # Integrate findings to identify overarching structure
     print("\n========================================")
@@ -239,6 +289,28 @@ def comprehensive_analysis():
             ratios, proximity = dialectical_results["golden_ratio_analysis"]
             if np.mean(proximity) < 0.1:  # Close to Golden Ratio
                 significant_features.append(f"Strong presence of Golden Ratio relationships in triads")
+
+    # Add hypercube findings
+    if hypercube_results:
+        # Check hypercube path efficiency
+        if 'path_analysis' in hypercube_results:
+            path_analysis = hypercube_results['path_analysis']
+            if path_analysis['hypercube_edge_percentage'] > 50:  # More than 50% of edges are hypercube edges
+                significant_features.append(f"Efficient hypercube traversal ({path_analysis['hypercube_edge_percentage']:.1f}% hypercube edges)")
+
+        # Check subspace coverage
+        if 'subspace_analysis' in hypercube_results:
+            subspace_analysis = hypercube_results['subspace_analysis']
+            for dim, data in subspace_analysis.items():
+                avg_coverage = sum(d['coverage'] for d in data.values()) / len(data)
+                if avg_coverage > 0.7:  # More than 70% coverage
+                    significant_features.append(f"High coverage of {dim}D subspaces ({avg_coverage*100:.1f}%)")
+
+        # Check distance distribution
+        if 'distance_analysis' in hypercube_results:
+            distance_analysis = hypercube_results['distance_analysis']
+            if distance_analysis['avg_distance'] < 3:  # Average distance less than 3
+                significant_features.append(f"Compact sequence in hypercube space (avg distance: {distance_analysis['avg_distance']:.2f})")
     
     # Check overall statistical uniqueness
     num_metrics = len(king_wen_metrics)
@@ -270,7 +342,8 @@ def comprehensive_analysis():
         'symmetrical': best_score * 100 if best_score else 0,
         'philosophical': len(trends) if trends else 0,
         'communal': len(communities) if communities else 0,
-        'dialectical': len(dialectical_results["triads"]) if dialectical_results else 0
+        'dialectical': len(dialectical_results["triads"]) if dialectical_results else 0,
+        'hypercube': hypercube_results['path_analysis']['hypercube_edge_percentage'] if hypercube_results and 'path_analysis' in hypercube_results else 0
     }
     
     primary_principle = max(principles.items(), key=lambda x: x[1])[0]
@@ -290,6 +363,8 @@ def comprehensive_analysis():
         print("network of communities connected by specific transformation types.")
     elif primary_principle == 'dialectical':
         print("dialectical progression of thesis-antithesis-synthesis relationships.")
+    elif primary_principle == 'hypercube':
+        print("efficient traversal of a 6D hypercube space with balanced subspace coverage.")
     
     # Detailed description of the structure
     print("\nDetailed description:")
@@ -311,6 +386,13 @@ def comprehensive_analysis():
         description.extend([
             f"- {len(dialectical_results['triads'])} triadic relationships",
             f"- {len(dialectical_results['golden_ratio_analysis'][0])} Golden Ratio relationships"
+        ])
+
+    # Add hypercube findings
+    if hypercube_results:
+        description.extend([
+            f"- {hypercube_results['path_analysis']['hypercube_edge_percentage']:.1f}% hypercube edge usage",
+            f"- {len(hypercube_results['subspace_analysis'])} dimensional subspace traversals"
         ])
     
     description.extend([
@@ -344,6 +426,17 @@ def comprehensive_analysis():
         avg_antithesis = np.mean([t['antithesis_contribution'] for t in dialectical_results["triads"]])
         if abs(avg_thesis - avg_antithesis) < 1:
             description.append(f"- Balanced thesis-antithesis contributions in triads")
+
+    # Add hypercube insights
+    if hypercube_results:
+        if 'distance_analysis' in hypercube_results:
+            description.append(f"- Compact sequence in hypercube space (avg distance: {hypercube_results['distance_analysis']['avg_distance']:.2f})")
+        
+        if 'subspace_analysis' in hypercube_results:
+            for dim, data in hypercube_results['subspace_analysis'].items():
+                avg_coverage = sum(d['coverage'] for d in data.values()) / len(data)
+                if avg_coverage > 0.7:
+                    description.append(f"- High coverage of {dim}D subspaces ({avg_coverage*100:.1f}%)")
     
     # Print the description
     for line in description:
@@ -369,7 +462,8 @@ def comprehensive_analysis():
         'random_metrics': df_random,
         'uniqueness': uniqueness,
         'p_value': p_value,
-        'dialectical_analysis': dialectical_results
+        'dialectical_analysis': dialectical_results,
+        'hypercube_analysis': hypercube_results
     }
 
 def integrated_i_ching_analysis():

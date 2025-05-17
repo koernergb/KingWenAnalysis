@@ -1,3 +1,7 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import networkx as nx
+
 def analyze_triadic_relationships(hexagrams):
     """Analyze each consecutive triplet of hexagrams for dialectical patterns."""
     triads = []
@@ -30,9 +34,6 @@ def analyze_triadic_relationships(hexagrams):
 
 def visualize_dialectical_flow(triads):
     """Create a visualization of how each triad builds upon previous ones."""
-    import matplotlib.pyplot as plt
-    import numpy as np
-    
     # Extract metrics for plotting
     positions = [t['positions'][2] for t in triads]  # Position of synthesis
     thesis_contributions = [t['thesis_contribution'] for t in triads]
@@ -74,9 +75,6 @@ def visualize_dialectical_flow(triads):
 
 def visualize_dialectical_spiral(hexagrams):
     """Create a spiral visualization of dialectical development."""
-    import matplotlib.pyplot as plt
-    import numpy as np
-    
     # Create a figure
     fig = plt.figure(figsize=(12, 12))
     ax = fig.add_subplot(111, projection='polar')
@@ -124,9 +122,6 @@ def visualize_dialectical_spiral(hexagrams):
 
 def visualize_hexagram_evolution_network(hexagrams):
     """Create a network visualization of hexagram evolution."""
-    import networkx as nx
-    import matplotlib.pyplot as plt
-    
     # Create a directed graph
     G = nx.DiGraph()
     
@@ -189,9 +184,6 @@ def visualize_hexagram_evolution_network(hexagrams):
 
 def analyze_bit_contributions(hexagrams):
     """Analyze how each bit position contributes to the dialectical synthesis."""
-    import matplotlib.pyplot as plt
-    import numpy as np
-    
     # Number of triads
     n_triads = len(hexagrams) // 3
     
@@ -255,9 +247,6 @@ def analyze_bit_contributions(hexagrams):
 
 def analyze_golden_ratio_in_triads(hexagrams):
     """Analyze if the thesis:antithesis contribution ratio approximates the Golden Ratio."""
-    import matplotlib.pyplot as plt
-    import numpy as np
-    
     golden_ratio = (1 + np.sqrt(5)) / 2  # Approximately 1.618
     
     # Calculate contribution ratios for each triad
