@@ -14,9 +14,9 @@ def analyze_special_positions():
     
     # Calculate complexity of each transition
     transition_complexity = []
-    for i in range(n-1):
+    for i in range(n):
         from_hex = king_wen_sequence[i]
-        to_hex = king_wen_sequence[i+1]
+        to_hex = king_wen_sequence[(i+1) % n]  # Wrap around
         
         # Simple Hamming distance as one measure of complexity
         h_dist = hamming_distance(from_hex, to_hex)
@@ -74,13 +74,13 @@ def analyze_special_positions():
     # Visualize the transition complexity and pivots
     plt.figure(figsize=(15, 6))
     
-    # Plot complexity of each transition
-    plt.plot(range(1, n), transition_complexity, 'b-', linewidth=2)
+    # Plot complexity of each transition (positions 1 to n)
+    plt.plot(range(1, n+1), transition_complexity, 'b-', linewidth=2)
     plt.axhline(y=mean_complexity, color='r', linestyle='--', label='Mean Complexity')
     
-    # Highlight significant pivots
+    # Highlight significant pivots (positions are 1-based)
     for pos, _ in pivots:
-        plt.axvline(x=pos, color='g', alpha=0.3)
+        plt.axvline(x=pos+1, color='g', alpha=0.3)  # pos+1 to match x-axis
     
     plt.title('Transition Complexity and Pivot Positions in King Wen Sequence')
     plt.xlabel('Position in Sequence')
@@ -105,16 +105,14 @@ def analyze_special_positions():
     intra_house_transitions = 0
     inter_house_transitions = 0
     
-    for i in range(n-1):
+    for i in range(n):
         from_house = None
         to_house = None
-        
         for h, house in enumerate(houses):
             if i in house:
                 from_house = h
-            if i+1 in house:
+            if (i+1) % n in house:
                 to_house = h
-        
         if from_house == to_house:
             intra_house_transitions += 1
         else:

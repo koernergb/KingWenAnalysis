@@ -35,49 +35,48 @@ def create_hypercube_graph():
     return G
 
 def king_wen_to_binary(king_wen_sequence):
-    """Convert King Wen hexagram numbers to binary representations."""
+    """Convert a list of King Wen hexagrams (as binary strings or integers) to binary representations."""
     binary_sequence = []
     for hexagram in king_wen_sequence:
-        # Hexagram numbers are 1-indexed, so subtract 1 for 0-indexing
-        index = hexagram - 1
+        if isinstance(hexagram, str):
+            # If already a binary string, convert to int
+            index = int(hexagram, 2)
+        elif isinstance(hexagram, int):
+            # If integer, use as is (assume 1-indexed)
+            index = hexagram - 1
+        else:
+            raise ValueError(f"Unexpected hexagram type: {type(hexagram)}")
         binary = format(index, '06b')
         binary_sequence.append(binary)
     return binary_sequence
 
 def analyze_king_wen_path(king_wen_sequence, hypercube_graph):
-    """Analyze how the King Wen sequence traverses the hypercube."""
+    """Analyze how the King Wen sequence traverses the hypercube, treating the sequence as circular."""
     binary_sequence = king_wen_to_binary(king_wen_sequence)
-    
     # Create a path graph representing the King Wen sequence
     path_graph = nx.DiGraph()
     for i in range(len(binary_sequence)):
         hex_num = king_wen_sequence[i]
         binary = binary_sequence[i]
         path_graph.add_node(hex_num, binary=binary, pos=i)
-    
-    # Add edges between consecutive hexagrams in the sequence
-    for i in range(len(king_wen_sequence)-1):
+    # Add edges between consecutive hexagrams in the sequence, including last-to-first
+    for i in range(len(king_wen_sequence)):
         hex1 = king_wen_sequence[i]
-        hex2 = king_wen_sequence[i+1]
+        hex2 = king_wen_sequence[(i+1) % len(king_wen_sequence)]  # Wrap around
         bin1 = binary_sequence[i]
-        bin2 = binary_sequence[i+1]
+        bin2 = binary_sequence[(i+1) % len(binary_sequence)]
         h_dist = hamming_distance(bin1, bin2)
         path_graph.add_edge(hex1, hex2, hamming=h_dist)
-    
     # Calculate statistics about the path
-    hamming_distances = [hamming_distance(binary_sequence[i], binary_sequence[i+1]) 
-                         for i in range(len(binary_sequence)-1)]
-    
+    hamming_distances = [hamming_distance(binary_sequence[i], binary_sequence[(i+1) % len(binary_sequence)])
+                         for i in range(len(binary_sequence))]
     edge_types = {}
     for dist in range(1, 7):
         edge_types[dist] = hamming_distances.count(dist)
-    
     # Calculate how many hypercube edges the King Wen sequence traverses
-    hypercube_edges_used = sum(1 for i in range(len(king_wen_sequence)-1) 
+    hypercube_edges_used = sum(1 for i in range(len(king_wen_sequence))
                               if hamming_distances[i] == 1)
-    
-    hypercube_edge_percentage = hypercube_edges_used / (len(king_wen_sequence) - 1) * 100
-    
+    hypercube_edge_percentage = hypercube_edges_used / len(king_wen_sequence) * 100
     return {
         'path_graph': path_graph,
         'hamming_distances': hamming_distances,
@@ -178,29 +177,21 @@ def analyze_king_wen_hypercube_path_efficiency():
     return hamming_dist_counts, expected_distribution
 
 def analyze_triadic_structure_in_hypercube(king_wen_sequence):
-    """Analyze how triadic groups in the King Wen sequence relate to hypercube geometry."""
+    """Analyze how triadic groups in the King Wen sequence relate to hypercube geometry, treating the sequence as circular."""
     binary_sequence = king_wen_to_binary(king_wen_sequence)
-    
     triads = []
-    for i in range(0, len(binary_sequence) - 2, 3):
-        thesis = binary_sequence[i]
-        antithesis = binary_sequence[i+1]
-        synthesis = binary_sequence[i+2]
-        
-        # Calculate Hamming distances within triad
+    n = len(binary_sequence)
+    for i in range(0, n, 3):
+        thesis = binary_sequence[i % n]
+        antithesis = binary_sequence[(i+1) % n]
+        synthesis = binary_sequence[(i+2) % n]
         d_t_a = hamming_distance(thesis, antithesis)
         d_t_s = hamming_distance(thesis, synthesis)
         d_a_s = hamming_distance(antithesis, synthesis)
-        
-        # Calculate geometric relationships in 6D space
         thesis_coords = binary_to_coordinates(thesis)
         antithesis_coords = binary_to_coordinates(antithesis)
         synthesis_coords = binary_to_coordinates(synthesis)
-        
-        # Check if synthesis is approximately on the path between thesis and antithesis
-        # in 6D space (simplified calculation)
         path_ratio = sum(abs((t + a)/2 - s) for t, a, s in zip(thesis_coords, antithesis_coords, synthesis_coords)) / 6
-        
         triads.append({
             'triad_num': i//3 + 1,
             'thesis': thesis,
@@ -211,7 +202,6 @@ def analyze_triadic_structure_in_hypercube(king_wen_sequence):
             'hamming_a_s': d_a_s,
             'path_ratio': path_ratio
         })
-    
     return triads
 
 def visualize_triads_in_hypercube(triads, coords_3d):
@@ -391,3 +381,15 @@ king_wen_sequence = list(range(1, 65))  # Placeholder - use actual King Wen sequ
 
 # Run analysis
 results = run_hypercube_analysis(king_wen_sequence)
+
+# At the bottom, ensure run_hypercube_analysis is only called with a list of integers (1-64)
+# If king_wen_sequence is a list of binary strings, convert to 1-64 integers for this call
+if __name__ == "__main__":
+    # Try to detect type and convert if needed
+    from utils import king_wen_sequence as kw_seq
+    if isinstance(kw_seq[0], str):
+        # Convert binary strings to 1-64 indices
+        kw_seq_int = [int(h, 2) + 1 for h in kw_seq]
+    else:
+        kw_seq_int = kw_seq
+    results = run_hypercube_analysis(kw_seq_int)

@@ -41,6 +41,21 @@ def fibonacci_analysis(sequence=king_wen_sequence):
             
         relationships.append((pos1, pos2, trans_type))
     
+    # Add wrap-around relationship from last Fibonacci position to first
+    if len(fib_positions) > 1:
+        pos1 = fib_positions[-1]
+        pos2 = fib_positions[0]
+        hex1 = sequence[pos1-1]
+        hex2 = sequence[pos2-1]
+        if hex2 == ''.join('1' if bit == '0' else '0' for bit in hex1):
+            trans_type = "Inversion"
+        elif hex2 == hex1[::-1]:
+            trans_type = "Reversal"
+        else:
+            h_dist = sum(c1 != c2 for c1, c2 in zip(hex1, hex2))
+            trans_type = f"Hamming distance {h_dist}"
+        relationships.append((pos1, pos2, trans_type))
+    
     # Visualize Fibonacci positions
     plt.figure(figsize=(12, 6))
     plt.plot(range(1, 65), [0]*64, 'k-', alpha=0.3)
@@ -78,20 +93,22 @@ def golden_ratio_analysis(sequence=king_wen_sequence):
         position1 = i
         position2 = round(i * phi)
         
-        if position2 <= 64:
-            hex1 = sequence[position1-1]
-            hex2 = sequence[position2-1]
+        if position2 > 64:
+            position2 = ((position2 - 1) % 64) + 1  # Wrap around
+        
+        hex1 = sequence[position1-1]
+        hex2 = sequence[position2-1]
+        
+        # Calculate relationship
+        if hex2 == ''.join('1' if bit == '0' else '0' for bit in hex1):
+            trans_type = "Inversion"
+        elif hex2 == hex1[::-1]:
+            trans_type = "Reversal"
+        else:
+            h_dist = sum(c1 != c2 for c1, c2 in zip(hex1, hex2))
+            trans_type = f"Hamming distance {h_dist}"
             
-            # Calculate relationship
-            if hex2 == ''.join('1' if bit == '0' else '0' for bit in hex1):
-                trans_type = "Inversion"
-            elif hex2 == hex1[::-1]:
-                trans_type = "Reversal"
-            else:
-                h_dist = sum(c1 != c2 for c1, c2 in zip(hex1, hex2))
-                trans_type = f"Hamming distance {h_dist}"
-                
-            golden_pairs.append((position1, position2, trans_type))
+        golden_pairs.append((position1, position2, trans_type))
     
     # Visualize Golden Ratio relationships
     plt.figure(figsize=(12, 6))
@@ -120,9 +137,9 @@ def aesthetic_proportion_analysis(sequence=king_wen_sequence):
     """
     # Calculate transformations between consecutive hexagrams
     transformations = []
-    for i in range(len(sequence)-1):
+    for i in range(len(sequence)):
         hex1 = sequence[i]
-        hex2 = sequence[i+1]
+        hex2 = sequence[(i+1) % len(sequence)]  # Wrap around
         
         # Determine transformation type
         if hex2 == ''.join('1' if bit == '0' else '0' for bit in hex1):

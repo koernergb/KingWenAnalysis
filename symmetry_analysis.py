@@ -132,7 +132,7 @@ def analyze_symmetry_internal():
     plt.tight_layout()
     plt.show()
     
-    # Analyze opposite positions
+    # Analyze opposite positions (already circular)
     opposite_correlations = []
     for i in range(n):
         opposite_pos = get_opposite_position(i)

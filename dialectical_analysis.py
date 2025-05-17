@@ -3,24 +3,18 @@ import matplotlib.pyplot as plt
 import networkx as nx
 
 def analyze_triadic_relationships(hexagrams):
-    """Analyze each consecutive triplet of hexagrams for dialectical patterns."""
+    """Analyze each consecutive triplet of hexagrams for dialectical patterns, treating the sequence as circular."""
     triads = []
-    
-    for i in range(0, len(hexagrams) - 2, 3):
-        thesis = hexagrams[i]
-        antithesis = hexagrams[i+1]
-        synthesis = hexagrams[i+2]
-        
-        # Calculate how synthesis incorporates elements from thesis and antithesis
+    n = len(hexagrams)
+    for i in range(0, n, 3):
+        thesis = hexagrams[i % n]
+        antithesis = hexagrams[(i+1) % n]
+        synthesis = hexagrams[(i+2) % n]
         thesis_contribution = sum(1 for a, c in zip(thesis, synthesis) if a == c)
         antithesis_contribution = sum(1 for b, c in zip(antithesis, synthesis) if b == c)
-        
-        # Calculate unique elements in synthesis
-        unique_elements = sum(1 for a, b, c in zip(thesis, antithesis, synthesis) 
-                             if c != a and c != b)
-        
+        unique_elements = sum(1 for a, b, c in zip(thesis, antithesis, synthesis) if c != a and c != b)
         triads.append({
-            'positions': (i+1, i+2, i+3),  # 1-indexed positions
+            'positions': ((i % n)+1, ((i+1)%n)+1, ((i+2)%n)+1),
             'thesis': thesis,
             'antithesis': antithesis,
             'synthesis': synthesis,
@@ -29,7 +23,6 @@ def analyze_triadic_relationships(hexagrams):
             'unique_elements': unique_elements,
             'synthesis_ratio': thesis_contribution / antithesis_contribution if antithesis_contribution else float('inf')
         })
-    
     return triads
 
 def visualize_dialectical_flow(triads):

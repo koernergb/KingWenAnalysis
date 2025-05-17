@@ -17,24 +17,25 @@ def permutation_analysis():
     def calculate_metrics(sequence):
         metrics = {}
         
-        # Hamming distance between consecutive hexagrams
+        # Hamming distance between consecutive hexagrams (circular)
         hamming_distances = []
-        for i in range(len(sequence) - 1):
-            hamming_distances.append(hamming_distance(sequence[i], sequence[i + 1]))
+        n = len(sequence)
+        for i in range(n):
+            hamming_distances.append(hamming_distance(sequence[i], sequence[(i + 1) % n]))
         
         metrics['mean_hamming'] = np.mean(hamming_distances)
         metrics['var_hamming'] = np.var(hamming_distances)
         
-        # Count specific transformations
+        # Count specific transformations (circular)
         transformation_counts = {
             'inversion': 0,
             'reversal': 0,
             'swap_trigrams': 0
         }
         
-        for i in range(len(sequence) - 1):
+        for i in range(n):
             current = sequence[i]
-            next_hex = sequence[i + 1]
+            next_hex = sequence[(i + 1) % n]
             
             if next_hex == ''.join('1' if bit == '0' else '0' for bit in current):
                 transformation_counts['inversion'] += 1
@@ -45,24 +46,24 @@ def permutation_analysis():
         
         metrics.update(transformation_counts)
         
-        # Mutual information between positions
+        # Mutual information between positions (circular)
         sequence_ints = [int(x, 2) for x in sequence]
         mutual_info = []
         
-        for distance in range(1, min(11, len(sequence))):
-            sequence1 = sequence_ints[:-distance]
-            sequence2 = sequence_ints[distance:]
+        for distance in range(1, min(11, n)):
+            sequence1 = sequence_ints
+            sequence2 = np.roll(sequence_ints, -distance)
             mi = mutual_info_score(sequence1, sequence2)
             mutual_info.append(mi)
         
         metrics['mutual_info_1'] = mutual_info[0]
         metrics['mutual_info_avg'] = np.mean(mutual_info)
         
-        # Entropy of subsequences
+        # Entropy of subsequences (circular)
         entropies = []
         window_size = 3
-        for i in range(len(sequence) - window_size + 1):
-            window = sequence[i:i + window_size]
+        for i in range(n):
+            window = [sequence[(i + j) % n] for j in range(window_size)]
             window_ints = [int(x, 2) for x in window]
             values, counts = np.unique(window_ints, return_counts=True)
             probabilities = counts / len(window_ints)

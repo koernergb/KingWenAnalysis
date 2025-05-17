@@ -22,12 +22,12 @@ def analyze_trigram_polarities() -> List[str]:
         "110": "001"   # Lake-Mountain
     }
     
-    # Analyze distribution of polar pairs in adjacent hexagrams
+    # Analyze distribution of polar pairs in adjacent hexagrams (circular)
     polarity_transitions = []
-    for i in range(len(king_wen_sequence) - 1):
+    n = len(king_wen_sequence)
+    for i in range(n):
         hex1 = king_wen_sequence[i]
-        hex2 = king_wen_sequence[i + 1]
-        
+        hex2 = king_wen_sequence[(i + 1) % n]  # Wrap around
         upper1, lower1 = hex1[:3], hex1[3:]
         upper2, lower2 = hex2[:3], hex2[3:]
         
@@ -108,15 +108,14 @@ def vector_representation_analysis() -> Dict[str, List[int]]:
     # Represent hexagrams as numerical vectors (converting binary to integers)
     hex_vectors = []
     for hexagram in king_wen_sequence:
-        # Convert each line to numerical value (0 or 1)
         vector = [int(bit) for bit in hexagram]
         hex_vectors.append(vector)
     
-    # Calculate vector differences between consecutive hexagrams
+    # Calculate vector differences between consecutive hexagrams (circular)
     vector_transformations = []
-    for i in range(len(hex_vectors) - 1):
-        # Element-wise subtraction module 2 (XOR operation in binary)
-        transform = [(a - b) % 2 for a, b in zip(hex_vectors[i+1], hex_vectors[i])]
+    n = len(king_wen_sequence)
+    for i in range(n):
+        transform = [(hex_vectors[(i+1)%n][j] - hex_vectors[i][j]) % 2 for j in range(6)]
         vector_transformations.append(transform)
     
     # Classify transformation types by vector patterns

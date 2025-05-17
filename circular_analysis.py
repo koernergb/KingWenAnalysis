@@ -113,7 +113,7 @@ def circular_symmetry_analysis():
     fft_vals = np.abs(fft(yang_counts - np.mean(yang_counts)))
     freqs = np.fft.fftfreq(n)
     plt.figure(figsize=(12, 6))
-    plt.stem(freqs[:n//2], fft_vals[:n//2], use_line_collection=True)
+    plt.stem(freqs[:n//2], fft_vals[:n//2])
     plt.xlabel('Frequency')
     plt.ylabel('Amplitude')
     plt.title('Fourier Spectrum of Yang Line Count (Circular)')

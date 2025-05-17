@@ -41,12 +41,12 @@ def map_transformation_patterns():
         lower = hex_str[3:]
         return upper + operation(lower)
     
-    # Analyze each pair of consecutive hexagrams
+    # Analyze each pair of consecutive hexagrams (circular)
     transformations = []
-    
-    for i in range(len(king_wen_sequence) - 1):
+    n = len(king_wen_sequence)
+    for i in range(n):
         current = king_wen_sequence[i]
-        next_hex = king_wen_sequence[i + 1]
+        next_hex = king_wen_sequence[(i + 1) % n]  # Wrap around
         
         # Check for exact matches with our defined transformations
         if next_hex == invert(current):
@@ -80,7 +80,7 @@ def map_transformation_patterns():
             else:
                 trans = f"Complex ({h_dist} bits)"
         
-        transformations.append((i, i+1, trans, current, next_hex))
+        transformations.append((i, (i+1)%n, trans, current, next_hex))
     
     # Create a visualization of the transformation sequence
     # First, count the frequency of each transformation type

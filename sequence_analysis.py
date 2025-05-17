@@ -29,13 +29,11 @@ def calculate_mutual_information(sequence, max_distance=32):  # Changed to 32 fo
     sequence_ints = [int(x, 2) for x in sequence]
     mutual_info = []
     n = len(sequence)
-    
     for distance in range(1, max_distance + 1):
         sequence1 = sequence_ints
         sequence2 = [sequence_ints[(i + distance) % n] for i in range(n)]
         mi = mutual_info_score(sequence1, sequence2)
         mutual_info.append(mi)
-    
     return mutual_info
 
 def analyze_sequence():
@@ -46,7 +44,7 @@ def analyze_sequence():
 def analyze_king_wen_sequence():
     """Analyze the King Wen sequence using circular information theory metrics."""
     # Calculate circular Hamming distances
-    hamming_distances = calculate_circular_hamming_distances(king_wen_sequence)
+    hamming_distances = [hamming_distance(king_wen_sequence[i], king_wen_sequence[(i + 1) % len(king_wen_sequence)]) for i in range(len(king_wen_sequence))]
     
     # Generate random sequences for comparison
     num_random_sequences = 100

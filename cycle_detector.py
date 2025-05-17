@@ -36,6 +36,19 @@ def analyze_cycles_internal():
                 if hex_j == trans_func(hex_i):
                     G.add_edge(i, j, transformation=trans_name)
     
+    # --- CIRCULARITY MODIFICATION ---
+    # Treat the sequence as circular by connecting last to first for each transformation type
+    last_idx = len(king_wen_sequence) - 1
+    first_idx = 0
+    hex_last = king_wen_sequence[last_idx]
+    hex_first = king_wen_sequence[first_idx]
+    for trans_name, trans_func in transformations.items():
+        if hex_first == trans_func(hex_last):
+            G.add_edge(last_idx, first_idx, transformation=trans_name)
+        if hex_last == trans_func(hex_first):
+            G.add_edge(first_idx, last_idx, transformation=trans_name)
+    # --- END CIRCULARITY MODIFICATION ---
+    
     # Find all simple cycles in the graph
     cycles = list(nx.simple_cycles(G))
     
